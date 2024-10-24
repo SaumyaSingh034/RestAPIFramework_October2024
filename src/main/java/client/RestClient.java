@@ -5,11 +5,29 @@ import constants.AuthType;
 import custom_exception.FrameworkException;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 
 import java.util.Base64;
+import java.util.Map;
+
+import static io.restassured.RestAssured.expect;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.equalTo;
 
 public class RestClient {
+
+    private ResponseSpecification responseSpec200 = expect().statusCode(200);
+    private ResponseSpecification responseSpec200or201 = expect().statusCode(anyOf(equalTo(200), equalTo(201)));
+    private ResponseSpecification responseSpec200or404 = expect().statusCode(anyOf(equalTo(200), equalTo(404)));
+    private ResponseSpecification responseSpec201 = expect().statusCode(201);
+    private ResponseSpecification responseSpec204 = expect().statusCode(204);
+    private ResponseSpecification responseSpec400 = expect().statusCode(400);
+    private ResponseSpecification responseSpec401 = expect().statusCode(401);
+    private ResponseSpecification responseSpec404 = expect().statusCode(404);
+    private ResponseSpecification responseSpec422 = expect().statusCode(422);
+    private ResponseSpecification responseSpec500 = expect().statusCode(500);
 
     private RequestSpecification setUpRequest(String baseUrl, AuthType authType, ContentType contentType){
         RequestSpecification requestSpecification = RestAssured.given().log().all()
@@ -58,5 +76,30 @@ public class RestClient {
                 .then()
                 .extract()
                 .path("access_token");
+    }
+
+    //All CURD Operations
+
+    public Response get(String baseUrl, String endpoint, Map<String, String> queryParams, Map<String, String> pathParams,
+                        AuthType authType, ContentType contentType){
+        RequestSpecification requestSpecification = setUpAuthAndContentType(baseUrl, authType, contentType);
+        applyParams(requestSpecification,queryParams, pathParams);
+       Response response =  requestSpecification.get(endpoint).then().spec(responseSpec200).extract().response();
+       return response;
+
+
+    }
+
+    private RequestSpecification setUpAuthAndContentType(String baseUrl, AuthType authType, ContentType contentType){
+        return setUpRequest(baseUrl, authType, contentType);
+    }
+
+    private void applyParams(RequestSpecification request, Map<String, String> queryParams, Map<String, String> pathParams) {
+        if(queryParams!=null) {
+            request.queryParams(queryParams);
+        }
+        if(pathParams!=null) {
+            request.pathParams(pathParams);
+        }
     }
 }

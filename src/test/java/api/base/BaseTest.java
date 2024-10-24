@@ -1,5 +1,6 @@
 package api.base;
 
+import client.RestClient;
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
 import org.testng.annotations.BeforeSuite;
@@ -25,6 +26,8 @@ public class BaseTest {
     protected static final String CONTACTS_USER_LOGIN_ENDPOINT = "/users/login";
     protected static final String CONTACTS_ALL_ENDPOINT = "/contacts";
 
+    protected RestClient restClient;
+
 
     @BeforeSuite
     public void setUpReport(){
@@ -33,6 +36,7 @@ public class BaseTest {
 
     @BeforeTest
     public void setUp(){
+        restClient = new RestClient();
 
     }
 
